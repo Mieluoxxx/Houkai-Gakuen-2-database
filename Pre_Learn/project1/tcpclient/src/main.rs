@@ -4,6 +4,7 @@ use std::str;
 
 fn main(){
     let mut stream = TcpStream::connect("localhost:3000").unwrap();
+<<<<<<< Updated upstream
     stream.write("Hello".as_bytes()).unwrap();
 
     let mut buffer = [0; 5];
@@ -13,4 +14,15 @@ fn main(){
         "Response from server:{:?}",
         str::from_utf8(&buffer).unwrap()
     )
+=======
+    stream.write("hello".as_bytes()).unwrap();
+
+    let mut buffer = [0;5];
+    stream.read(&mut buffer).unwrap();
+
+    println!(
+        "Response from server:{:?}", 
+        str::from_utf8(&buffer).unwrap()
+    );
+>>>>>>> Stashed changes
 }

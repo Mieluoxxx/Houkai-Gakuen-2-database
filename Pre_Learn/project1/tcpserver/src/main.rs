@@ -3,7 +3,11 @@ use std::net::TcpListener;
 
 fn main(){
     let listener = TcpListener::bind("127.0.0.1:3000").unwrap();
+<<<<<<< Updated upstream
     println!("Running on port 3000...");
+=======
+    println!("Running on port 3000 ...");
+>>>>>>> Stashed changes
 
     for stream in listener.incoming(){
         let mut stream = stream.unwrap();
