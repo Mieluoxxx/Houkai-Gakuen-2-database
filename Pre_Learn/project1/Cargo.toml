@@ -1,7 +1,3 @@
 [workspace]
 
-<<<<<<< Updated upstream
 members = ["tcpserver", "tcpclient", "http", "httpserver"]
-=======
-members = ["tcpserver", "tcpclient", "http", "httpserver"]
->>>>>>> Stashed changes
