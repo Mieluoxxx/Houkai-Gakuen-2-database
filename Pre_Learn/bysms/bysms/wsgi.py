@@ -1,5 +1,5 @@
 """
-WSGI bysms for bysms project.
+WSGI config for bysms project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

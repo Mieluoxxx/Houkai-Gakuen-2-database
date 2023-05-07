@@ -1,5 +1,5 @@
 """
-ASGI bysms for bysms project.
+ASGI config for bysms project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

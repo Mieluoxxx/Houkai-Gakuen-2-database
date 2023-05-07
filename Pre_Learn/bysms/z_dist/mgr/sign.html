@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>罗德岛制药 | 登录</title>
+
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="../cdnjs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="../cdnjs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <link rel="stylesheet" href="../cdnjs/admin-lte/2.4.8/css/AdminLTE.min.css">
+
+    <script src="../cdnjs/jquery/3.5.0/jquery.min.js"></script>
+
+    <script src="../cdnjs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+</head>
+<body class="hold-transition login-page" style="overflow-y:hidden">
+<div class="login-box">
+    <div class="login-logo">
+        <a href="#" style="color:#32779f"><b>白月SMS</b>系统</a>
+    </div>
+
+    <div class="login-box-body text-center">
+        <p class="login-box-msg">输入用户名、密码登录</p>
+
+        <div>
+            <div class="form-group has-feedback">
+                <input type="username" class="form-control" id="username" placeholder="用户名" onkeydown="on_return()">
+                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <input type="password" class="form-control" placeholder="密码" id="password" onkeydown="on_return()">
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+            <div class="row">
+
+
+                <div class="col-xs-12">
+                    <button type="submit" class="btn btn-primary btn-block btn-flat" onclick="postLoginRequest()">登录
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="social-auth-links text-center">
+
+        </div>
+
+
+        <a href="#" style="text-align:center">忘记密码？</a><br>
+        <a href="register.html" class="text-center">注册新账号</a>
+
+    </div>
+
+</div>
+
+
+<script>function postLoginRequest() {
+    console.log("login");
+    const e = $("#username").val(), n = $("#password").val();
+    0 !== e.length ? 0 !== n.length ? $.ajax({
+        url: "/api/mgr/signin",
+        type: "POST",
+        data: "username=" + e + "&password=" + n,
+        success: function (e, n, t) {
+            e.ret = undefined;
+            0 === e.ret ? window.location.href = "/mgr/index.html" : (alert("登录失败 : " + e.msg), $("#password").val(""))
+        },
+        error: function (e, n, t) {
+            alert("错误: " + e.status + t)
+        }
+    }) : alert("请输入密码") : alert("请输入用户名")
+}
+
+function curTimestamp() {
+    const e = (new Date).getTime();
+    return Math.floor(e / 1e3)
+}
+
+const lastSendReqTime = 0;
+
+function on_return(e) {
+    if (13 === e) {
+        var n = curTimestamp();
+        if (n - window.lastSendReqTime < 5) return;
+        window.lastSendReqTime = n, postLoginRequest()
+    }
+}
+
+document.onkeydown = function (e) {
+    on_return(window.event ? window.event.keyCode : e.which)
+}</script>
+</body>
+</html>
