@@ -1,0 +1,27 @@
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+
+{% block content %}
+
+<div class="box">
+  <form method="post">
+    <div class="input-box">
+      <label for="username">Username</label>
+      <input name="username" id="username" required />
+    </div>
+    <div class="input-box">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required />
+    </div>
+    <div class="btn-box">
+      <a href="{{ url_for('auth.login') }}">返回登录</a>
+      <div>
+        <input type="submit" value="注册" class="btn-register" />
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
