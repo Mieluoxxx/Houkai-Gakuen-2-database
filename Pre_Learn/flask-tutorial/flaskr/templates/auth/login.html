@@ -1,0 +1,29 @@
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+
+{% block content %}
+
+<div class="box">
+  <form method="post">
+    <div class="input-box">
+      <label for="username">Username</label>
+      <input name="username" id="username" required />
+    </div>
+    <div class="input-box">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required />
+    </div>
+    <div class="btn-box">
+      <a href="">Forgot Password?</a>
+      <div>
+        <input type="submit" value="Log In" class="btn-login" />
+        <button value="Sign Up">
+          <a href="{{ url_for('auth.register') }}" style="color: white; font-weight: 400; text-decoration: none;">Sign Up</a>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
