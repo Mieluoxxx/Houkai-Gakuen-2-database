@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>订单管理</title>
+{% endblock %}
+
+{% block table %}
+    <input class="form-control" id="myInput" type="text" placeholder="Search.." style="width:40%; margin:10px auto">
+    <table class="table" style="width: 600px; margin: 10px auto">
+        <thead>
+        <tr>
+            <th scope="col">订单ID</th>
+            <th scope="col">订单名称</th>
+            <th scope="col">订单类型</th>
+            <th scope="col">订单时间</th>
+            <th scope="col">功能</th>
+        </tr>
+        </thead>
+        <tbody id="myTable">
+        {% for order in Orderlists %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.type }}</td>
+                <td>{{ order.date }}</td>
+                <td>
+                    <a href="#" onclick="Detail({{ order.id }})">详细</a>
+                    <a href="#" onclick="confirmDelete({{ order.id }})">删除</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block add %}'/orderlist/add'{% endblock %}
+{% block add_title %} 新增订单 {% endblock %}
+
+{% block script %}
+    <script>
+                function Detail(id) {
+            // 发送 AJAX 请求获取订单详情
+            fetch(`/orderlist/detail?id=${id}`)
+                .then(response => response.json())
+                .then(orderlist => {
+                    if (orderlist.error) {
+                        // 如果出错，弹出错误提示
+                        alert(orderlist.error);
+                    } else {
+                        // 创建模态框的 HTML 结构
+                        const modalHtml = `
+                    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="detailModalLabel">订单详情</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <h5>${orderlist.name}</h5>
+                            <p>创建时间：${orderlist.date}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                `;
+
+                        // 将模态框添加到页面中
+                        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                        // 获取模态框元素
+                        const modal = document.querySelector('#detailModal');
+
+                        // 显示模态框
+                        const modalInstance = new bootstrap.Modal(modal);
+                        modalInstance.show();
+                    }
+                })
+                .catch(error => {
+                    // 如果出错，弹出错误提示
+                    alert(error.message);
+                });
+        }
+
+        function confirmDelete(id) {
+            if (confirm("您确定要删除该订单吗？")) {
+                window.location.href = "/orderlist/delete?id=" + id;
+            }
+        }
+    </script>
+{% endblock %}

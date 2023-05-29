@@ -1,0 +1,35 @@
+
+@app.route('/medicine_change', methods=['GET', 'POST'])
+def medicine_change():
+    medicine_id = request.args.get('id')
+    medicine = Customer.query.filter_by(id=medicine_id).first()
+    if request.method == 'POST':
+        medicine_number = request.form.get('medicine_number')
+        medicine_name = request.form.get('medicine_name')
+        medicine_price = float(request.form.get('medicine_price'))
+        medicine_stock = int(request.form.get('medicine_stock'))
+        medicine_description = request.form.get('medicine_description')
+
+        if not medicine_number:
+            flash('批准文号不能为空')
+            return redirect('/medicine_change')
+        if not medicine_name:
+            flash('药物名称不能为空')
+            return redirect('/medicine_change')
+        if not medicine_price:
+            flash('药物售价不能为空')
+            return redirect('/medicine_change')
+        if not medicine_stock:
+            flash('药物库存量不能为空')
+            return redirect('/medicine_change')
+
+        medicine.number = medicine_number
+        medicine.name = medicine_name
+        medicine.price = medicine_price
+        medicine.stock = medicine_stock
+        medicine.description = medicine_description
+
+        db.session.add(medicine)
+        db.session.commit()
+        return redirect('/medicine')
+    return render_template('medicine/medicine_change.html', medicine=medicine)

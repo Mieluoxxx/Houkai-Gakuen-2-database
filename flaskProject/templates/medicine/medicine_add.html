@@ -1,0 +1,52 @@
+{% extends 'function.html' %}
+{% block title %}新增药物{% endblock %}
+
+{% block form %}
+    <form style="width:400px; margin: 100px auto" method="POST">
+        <div class="mb-3">
+            <label for="medicine_id"
+                   class="form-label">批准文号</label>
+            <input type="text"
+                   class="form-control"
+                   id="medicine_id"
+                   name="medicine_id"
+                   value="{% block id %}{% endblock %}">
+        </div>
+        <div class="mb-3">
+            <label for="medicine_name"
+                   class="form-label">药物名称</label>
+            <input type="text" class="form-control"
+                   id="medicine_name"
+                   name="medicine_name"
+                   value="{% block name %}{% endblock %}">
+        </div>
+        <div class="mb-3">
+            <label for="medicine_price"
+                   class="form-label">售价</label>
+            <input type="text"
+                   class="form-control"
+                   id="medicine_price"
+                   name="medicine_price"
+                   value="{% block price %}{% endblock %}">
+        </div>
+        <div class="mb-3">
+            <label for="medicine_stock"
+                   class="form-label">库存量</label>
+            <input type="text"
+                   class="form-control"
+                   id="medicine_stock"
+                   name="medicine_stock"
+                   value="{% block stock %}{% endblock %}">
+        </div>
+        <div class="mb-3">
+            <label for="medicine_description"
+                   class="form-label">药物描述</label>
+            <input type="text"
+                   class="form-control"
+                   id="medicine_description"
+                   name="medicine_description"
+                   value="{% block description %}{% endblock %}">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
