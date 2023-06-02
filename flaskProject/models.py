@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from config import db
 
 
 class User(db.Model):
@@ -9,6 +7,7 @@ class User(db.Model):
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(40), unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -55,8 +54,8 @@ class Orderlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     m_id = db.Column(db.String(40), db.ForeignKey('Medicine.id', ondelete='CASCADE'))
     c_id = db.Column(db.Integer, db.ForeignKey('Customer.id', ondelete='CASCADE'))
-    type = db.Column(db.String(20))
     name = db.Column(db.String(100))
+    type = db.Column(db.String(20), nullable=False, default="销售")
     date = db.Column(db.Date)
     quantity = db.Column(db.Integer, nullable=False)
 
@@ -65,9 +64,7 @@ class Orderlist(db.Model):
             'id': self.id,
             'm_id': self.m_id,
             'c_id': self.c_id,
-            'type': self.type,
             'name': self.name,
             'date': self.date,
             'quantity': self.quantity
         }
-

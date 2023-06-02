@@ -4,15 +4,6 @@
 {% block form %}
     <form style="width:400px; margin: 10px auto" method="POST">
         <div class="mb-3">
-            <label for="order_type"
-                   class="form-label">订单类型</label>
-            <input type="text"
-                   class="form-control"
-                   id="order_type"
-                   name="order_type"
-                   value="{% block type %}销售{% endblock %}">
-        </div>
-        <div class="mb-3">
             <label for="order_name"
                    class="form-label">订单名称</label>
             <input type="text"
@@ -31,7 +22,7 @@
         </div>
         <div class="mb-3">
             <label for="order_m_id"
-                   class="form-label">药物ID</label>
+                   class="form-label">药物批准文号</label>
             <input type="text"
                    class="form-control"
                    id="order_m_id"

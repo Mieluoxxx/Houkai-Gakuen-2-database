@@ -10,7 +10,6 @@
         <tr>
             <th scope="col">订单ID</th>
             <th scope="col">订单名称</th>
-            <th scope="col">订单类型</th>
             <th scope="col">订单时间</th>
             <th scope="col">功能</th>
         </tr>
@@ -20,11 +19,10 @@
             <tr>
                 <td>{{ order.id }}</td>
                 <td>{{ order.name }}</td>
-                <td>{{ order.type }}</td>
                 <td>{{ order.date }}</td>
                 <td>
                     <a href="#" onclick="Detail({{ order.id }})">详细</a>
-                    <a href="#" onclick="confirmDelete({{ order.id }})">删除</a></td>
+                    <a href="#" onclick="confirmDelete({{ order.id }})">退货</a></td>
             </tr>
         {% endfor %}
         </tbody>
@@ -36,11 +34,14 @@
 
 {% block script %}
     <script>
-                function Detail(id) {
+        function Detail(id) {
             // 发送 AJAX 请求获取订单详情
             fetch(`/orderlist/detail?id=${id}`)
                 .then(response => response.json())
-                .then(orderlist => {
+                .then(data => {
+                    const orderlist = data[0];
+                    const medicine = data[1];
+                    const customer = data[2];
                     if (orderlist.error) {
                         // 如果出错，弹出错误提示
                         alert(orderlist.error);
@@ -56,7 +57,10 @@
                           </div>
                           <div class="modal-body">
                             <h5>${orderlist.name}</h5>
-                            <p>创建时间：${new Date(orderlist.date).toLocaleDateString()}</p>
+                            <p>创建时间: ${new Date(orderlist.date).toLocaleDateString()}</p>
+                            <p>购买人: ${customer.name}</p>
+                            <p>购买药物: ${medicine.name}</p>
+                            <p>购买数量: ${orderlist.quantity}</p>
                           </div>
                         </div>
                       </div>
@@ -80,8 +84,9 @@
                 });
         }
 
+
         function confirmDelete(id) {
-            if (confirm("您确定要删除该订单吗？")) {
+            if (confirm("您确定要退货吗？")) {
                 window.location.href = "/orderlist/delete?id=" + id;
             }
         }
