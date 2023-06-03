@@ -3,6 +3,23 @@
     <title>药物管理</title>
 {% endblock %}
 
+{% block index %}
+    <a class="navbar-brand" href="#">真真夜夜的炼金台</a>
+{% endblock %}
+
+{% block nav %}
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/common/medicine">药物管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/common/orderlist">订单管理</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
 {% block table %}
     <input class="form-control" id="myInput" type="text" placeholder="Search.." style="width:40%; margin:10px auto">
     <table class="table" style="width: 700px; margin: 10px auto">
@@ -22,9 +39,7 @@
                 <td>{{ Medicine.price }}</td>
                 <td>{{ Medicine.stock }}</td>
                 <td>{{ Medicine.id }}</td>
-                <td><a href="#" onclick="Detail({{ Medicine.storage_id }})">详细</a> <a
-                        href="/medicine/change?id={{ Medicine.id }}">修改</a> <a
-                        href="#" onclick="confirmDelete({{ Medicine.id }})">删除</a></td>
+                <td><a href="#" onclick="Detail({{ Medicine.id }})">详细</a></td>
             </tr>
         {% endfor %}
         </tbody>
@@ -37,12 +52,10 @@
 {% block script %}
     <script>
         function Detail(id) {
-            // 发送 AJAX 请求获取订单详情
-            fetch(`/medicine/detail?storage_id=${id}`)
+            // 发送 AJAX 请求获取药品详情
+            fetch(`/medicine/detail?id=${id}`)
                 .then(response => response.json())
-                .then(data => {
-                    const medicine = data[0];
-                    const supplier = data[1];
+                .then(medicine => {
                     if (medicine.error) {
                         // 如果出错，弹出错误提示
                         alert(medicine.error);
@@ -57,10 +70,8 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
-                            <h5>药物详情</h5>
-                            <p>药物名称: ${medicine.name}</p>
-                            <p>生产商: ${supplier.name}</p>
-                            <p>药物描述: ${medicine.description}</p>
+                            <h5>${medicine.name}</h5>
+                            <p>描述：${medicine.description}</p>
                           </div>
                         </div>
                       </div>
@@ -72,11 +83,6 @@
 
                         // 获取模态框元素
                         const modal = document.querySelector('#detailModal');
-
-                        // 监听模态框关闭事件，刷新页面
-                        modal.addEventListener('hidden.bs.modal', function () {
-                            location.reload();
-                        });
 
                         // 显示模态框
                         const modalInstance = new bootstrap.Modal(modal);
@@ -90,10 +96,6 @@
         }
 
 
-        function confirmDelete(id) {
-            if (confirm("您确定要删除该药物吗？")) {
-                window.location.href = "/medicine/delete?id=" + id;
-            }
-        }
     </script>
 {% endblock %}
+{% block add_button %}{% endblock %}

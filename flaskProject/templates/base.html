@@ -13,24 +13,34 @@
 </head>
 <nav class="navbar navbar-expand-lg navbar-light bg-light opacity-75">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/index">真真夜夜的炼金台</a>
+        {% block index %}
+            <a class="navbar-brand" href="/index">真真夜夜的炼金台</a>
+        {% endblock %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/medicine">药物管理</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/customer">客户管理</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/orderlist">订单管理</a>
-                </li>
-            </ul>
-        </div>
+        {% block nav %}
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/medicine">药物管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/customer">客户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/supplier">供应商管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/orderlist">订单管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/purchase">采购管理</a>
+                    </li>
+                </ul>
+            </div>
+        {% endblock %}
     </div>
 </nav>
 <body class="navbar-custom">
@@ -57,13 +67,13 @@
 {% endblock %}
 {% block script %}
 {% endblock %}
-    <script>
-        $(document).ready(function () {
-            $("#myInput").on("keyup", function () {
-                var value = $(this).val().toLowerCase();
-                $("#myTable tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
             });
         });
-    </script>
+    });
+</script>

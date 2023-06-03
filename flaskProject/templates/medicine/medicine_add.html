@@ -21,6 +21,14 @@
                    value="{% block name %}{% endblock %}">
         </div>
         <div class="mb-3">
+            <label for="supplier_id"
+                   class="form-label">供应商ID</label>
+            <input type="text" class="form-control"
+                   id="supplier_id"
+                   name="supplier_id"
+                   value="{% block s_id %}{% endblock %}">
+        </div>
+        <div class="mb-3">
             <label for="medicine_price"
                    class="form-label">售价</label>
             <input type="text"
