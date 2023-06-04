@@ -41,7 +41,8 @@
                 <td>{{ order.type }}</td>
                 <td>
                     <a href="#" onclick="Detail({{ order.id }})">详细</a>{% if order.type != "退货" %}
-                    <a href="/common/orderlist/delete?id={{ order.id }}" onclick="confirmDelete({{ order.id }})">退货</a>
+                    <a href="/common/orderlist/delete?id={{ order.id }}"
+                       onclick="confirmDelete({{ order.id }})">退货</a>
                     </td>{% endif %}
             </tr>
         {% endfor %}
@@ -66,6 +67,7 @@
                         alert(orderlist.error);
                     } else {
                         // 创建模态框的 HTML 结构
+                        const sum = orderlist.quantity * medicine.price;
                         const modalHtml = `
                     <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
                       <div class="modal-dialog">
@@ -80,7 +82,7 @@
                             <p>购买人: ${customer.name}</p>
                             <p>购买药物: ${medicine.name}</p>
                             <p>购买数量: ${orderlist.quantity}</p>
-                            <p>总金额: ${orderlist.price}</p>
+                            <p>总金额: ${sum}</p>
                           </div>
                         </div>
                       </div>
@@ -92,6 +94,11 @@
 
                         // 获取模态框元素
                         const modal = document.querySelector('#detailModal');
+
+                        // 监听模态框关闭事件，刷新页面
+                        modal.addEventListener('hidden.bs.modal', function () {
+                            location.reload();
+                        });
 
                         // 显示模态框
                         const modalInstance = new bootstrap.Modal(modal);

@@ -1,33 +1,12 @@
-@bp.route('/common/medicine/detail')
-@bp.route('/medicine/detail')
-def medicine_detail():
-    # 获取药品 ID
-    id = request.args.get('storage_id')
-
-    # 从数据库中获取药品信息
-    medicine = Medicine.query.filter_by(storage_id=id).first()
-    supplier = Supplier.query.filter_by(id=medicine.s_id).first()
-    # 将药品信息转换为字典
-    medicine_dict = medicine.to_dict()
-    supplier_dict = supplier.to_dict()
-    # 将药品信息转换为 JSON 格式，并将其作为响应发送回客户端
-    return jsonify(medicine_dict, supplier_dict)
-
-
-@bp.route('/orderlist/detail')
-def orderlist_detail():
-    # 获取订单 ID
-    id = request.args.get('id')
-    # 从数据库中获取订单信息
-    order = Orderlist.query.filter_by(id=id).first()
-    medicine = Medicine.query.filter_by(id=order.m_id).first()
-    customer = Customer.query.filter_by(id=order.c_id).first()
-    sum = medicine.price * order.quantity
-    print(medicine.name, medicine.price, order.quantity, sum)
-    # 将订单信息转换为字典
-    order_dict = order.to_dict()
-    medicine_dict = medicine.to_dict()
-    customer_dict = customer.to_dict()
-    # 将订单信息转换为 JSON 格式，并将其作为响应发送回客户端
-    return jsonify(order_dict, medicine_dict, customer_dict)
-
+{% extends 'base.html' %}
+{% block style %}
+    <style>
+        .navbar-custom {
+            background-image: url("/static/img/bg2.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+    </style>
+{% endblock %}
+{% block add_button %}
+{% endblock %}

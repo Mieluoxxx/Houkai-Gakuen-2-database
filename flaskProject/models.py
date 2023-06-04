@@ -76,7 +76,6 @@ class Orderlist(db.Model):
     name = db.Column(db.String(100))
     type = db.Column(db.String(20), nullable=False, default="销售")
     date = db.Column(db.Date)
-    price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     is_returned = db.Column(db.Boolean, nullable=False, default=False)
 
@@ -88,7 +87,6 @@ class Orderlist(db.Model):
             'name': self.name,
             'type': self.type,
             'date': self.date,
-            'price': self.price,
             'quantity': self.quantity,
             'is_returned': self.is_returned
         }

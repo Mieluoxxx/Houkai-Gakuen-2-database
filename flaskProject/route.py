@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, request, flash, jsonify
 from datetime import date
 from models import db, User, Customer, Medicine, Orderlist, Supplier, Purchase
+from pyecharts.charts import Line
+from pyecharts import options as opts
 
 bp = Blueprint('main', __name__)
 
@@ -31,7 +33,40 @@ def common_index():
 
 @bp.route('/index')
 def admin():
-    return render_template('index.html')
+    result = db.session.query(Orderlist.date,
+                              db.func.coalesce(db.func.sum(Orderlist.quantity * Medicine.price), 0).label('销售额'),
+                              db.func.coalesce(db.func.sum(
+                                  Orderlist.quantity * Medicine.price - Orderlist.quantity * Purchase.price), 0).label(
+                                  '利润')
+                              ) \
+        .join(Medicine, Orderlist.m_id == Medicine.id) \
+        .join(Purchase, Medicine.id == Purchase.medicine_id) \
+        .filter(Purchase.purchase_date == Orderlist.date) \
+        .group_by(Orderlist.date).all()
+    data = []
+    for row in result:
+        date, order_amount, purchase_amount = row
+        data.append((date.strftime('%Y-%m-%d'), order_amount - purchase_amount))
+        print(date, order_amount, purchase_amount)
+    line = create_line(data)
+    return render_template('index.html', line=line)
+
+
+def create_line(data):
+    x_data = [i[0] for i in data]
+    y_data = [i[1] for i in data]
+    line = (
+        Line()
+        .add_xaxis(x_data)
+        .add_yaxis('净收入', y_data)
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="每日净收入"),
+            tooltip_opts=opts.TooltipOpts(trigger="axis"),
+            xaxis_opts=opts.AxisOpts(type_="category"),
+            yaxis_opts=opts.AxisOpts(type_="value"),
+        )
+    )
+    return line.render_embed()
 
 
 @bp.route('/customer')
@@ -290,7 +325,6 @@ def common_orderlist_add():
         orderlist_c_id = int(request.form.get('order_c_id'))
         orderlist_m_id = request.form.get('order_m_id')
         orderlist_quantity = int(request.form.get('order_quantity'))
-        price = Medicine.query.filter_by(id=orderlist_m_id).first().price * orderlist_quantity
         if orderlist_name and orderlist_c_id and orderlist_m_id and orderlist_quantity:
             if orderlist_c_id not in [c.id for c in Customer.query.all()]:
                 flash('Invalid customer ID')
@@ -300,8 +334,7 @@ def common_orderlist_add():
                 flash('Invalid quantity')
             else:
                 new_orderlist = Orderlist(m_id=orderlist_m_id, c_id=orderlist_c_id, name=orderlist_name,
-                                          quantity=orderlist_quantity, price=price,
-                                          date=date.today())
+                                          quantity=orderlist_quantity, date=date.today())
                 try:
                     db.session.add(new_orderlist)
                     db.session.commit()
@@ -322,7 +355,6 @@ def orderlist_add():
         orderlist_c_id = int(request.form.get('order_c_id'))
         orderlist_m_id = request.form.get('order_m_id')
         orderlist_quantity = int(request.form.get('order_quantity'))
-        price = Medicine.query.filter_by(id=orderlist_m_id).first().price * orderlist_quantity
         if orderlist_name and orderlist_c_id and orderlist_m_id and orderlist_quantity:
             if orderlist_c_id not in [c.id for c in Customer.query.all()]:
                 flash('Invalid customer ID')
@@ -332,8 +364,7 @@ def orderlist_add():
                 flash('Invalid quantity')
             else:
                 new_orderlist = Orderlist(m_id=orderlist_m_id, c_id=orderlist_c_id, name=orderlist_name,
-                                          quantity=orderlist_quantity, price=price,
-                                          date=date.today())
+                                          quantity=orderlist_quantity, date=date.today())
                 try:
                     db.session.add(new_orderlist)
                     db.session.commit()
@@ -359,13 +390,12 @@ def common_orderlist_delete():
     orderlist_type = "退货"
     orderlist_m_id = order.m_id
     orderlist_c_id = order.c_id
-    orderlist_price = order.price
     orderlist_quantity = order.quantity
 
     # 更新订单的退货状态
     order.is_returned = True
-    new_order = Orderlist(m_id=orderlist_m_id, c_id=orderlist_c_id, name=orderlist_name,
-                          quantity=orderlist_quantity, price=orderlist_price,
+    new_order = Orderlist(m_id=orderlist_m_id, c_id=orderlist_c_id,
+                          name=orderlist_name, quantity=orderlist_quantity,
                           date=date.today(), type=orderlist_type)
 
     db.session.add(new_order)
@@ -385,13 +415,12 @@ def orderlist_delete():
     orderlist_type = "退货"
     orderlist_m_id = order.m_id
     orderlist_c_id = order.c_id
-    orderlist_price = order.price
     orderlist_quantity = order.quantity
 
     # 更新订单的退货状态
     order.is_returned = True
-    new_order = Orderlist(m_id=orderlist_m_id, c_id=orderlist_c_id, name=orderlist_name,
-                          quantity=orderlist_quantity, price=orderlist_price,
+    new_order = Orderlist(m_id=orderlist_m_id, c_id=orderlist_c_id,
+                          name=orderlist_name, quantity=orderlist_quantity,
                           date=date.today(), type=orderlist_type)
 
     db.session.add(new_order)
