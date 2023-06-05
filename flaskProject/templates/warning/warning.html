@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-    <title>价格监控</title>
+    <title>风险操作</title>
 {% endblock %}
 
 {% block table %}
@@ -8,19 +8,18 @@
     <table class="table" style="width: 700px; margin: 10px auto">
         <thead>
         <tr>
+            <th scope="col">序号</th>
             <th scope="col">时间</th>
-            <th scope="col">药物名称</th>
-            <th scope="col">成本</th>
-            <th scope="col">售价</th>
+            <th scope="col">描述</th>
         </tr>
         </thead>
         <tbody id="myTable">
-        {% for price in prices %}
+        {% for wa in warnings %}
             <tr>
-            <td>{{ price.date }}</td>
-            <td>{{ price.m_id }}</td>
-            <td>{{ price.cost }}</td>
-            <td>{{ price.price }}</td>
+                <td>{{ wa.id }}</td>
+                <td>{{ wa.date }}</td>
+                <td>{{ wa.description }}</td>
+            </tr>
         {% endfor %}
         </tbody>
     </table>

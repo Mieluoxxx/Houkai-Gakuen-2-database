@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, redirect, request, flash, jsonify
 from datetime import date
 
-from sqlalchemy import desc, func
+from sqlalchemy import desc, and_
 
-from models import db, User, Customer, Medicine, Orderlist, Supplier, Purchase, MedicinePrice
+from models import db, User, Customer, Medicine, Orderlist, Supplier, Purchase, MedicinePrice, Warning
 from pyecharts.charts import Line
 from pyecharts import options as opts
 
@@ -80,6 +80,23 @@ def create_line(data):
     return line.render_embed()
 
 
+@bp.route('/price')
+def price():
+    price = db.session.query(
+        MedicinePrice.date,
+        Medicine.name.label('medicine_name'),
+        MedicinePrice.cost,
+        MedicinePrice.price
+    ).join(Medicine).all()
+    return render_template('price/price.html', prices=price)
+
+
+@bp.route('/warning')
+def warning():
+    warnings = Warning.query.order_by(desc(Warning.date)).all()
+    return render_template('warning/warning.html', warnings=warnings)
+
+
 @bp.route('/customer')
 def customer():
     customers = Customer.query.all()
@@ -108,8 +125,10 @@ def customer_add():
 def customer_delete():
     customer_id = request.args.get('id')
     customer = Customer.query.filter_by(id=customer_id).first()
+    new_Warning = Warning(description="删除客户：" + customer.name, date=date.today())
     if customer is None:
         return '客户不存在'
+    db.session.add(new_Warning)
     db.session.delete(customer)
     db.session.commit()
     return redirect('/customer')
@@ -120,6 +139,7 @@ def customer_change():
     customer_id = request.args.get('id')
     customer = Customer.query.filter_by(id=customer_id).first()
     if request.method == 'POST':
+        name, sex, phone, address = customer.name, customer.sex, customer.phone, customer.address
         customer_name = request.form.get('customer_name')
         customer_sex = request.form.get('customer_sex')
         customer_phone = request.form.get('customer_phone')
@@ -139,7 +159,12 @@ def customer_change():
         customer.sex = customer_sex
         customer.phone = customer_phone
         customer.address = customer_address
-
+        new_Warning = Warning(
+            description="修改客户：{}->{},{}->{},{}->{},{}->{}"
+            .format(name, customer_name, sex, customer_sex, phone,
+                    customer_phone, address, customer_address),
+            date=date.today())
+        db.session.add(new_Warning)
         db.session.add(customer)
         db.session.commit()
         return redirect('/customer')
@@ -173,8 +198,10 @@ def supplier_add():
 def supplier_delete():
     supplier_id = request.args.get('id')
     supplier = Supplier.query.filter_by(id=supplier_id).first()
+    new_Warning = Warning(description="删除供应商：" + supplier.name, date=date.today())
     if supplier is None:
-        return '客户不存在'
+        return '供应商不存在'
+    db.session.add(new_Warning)
     db.session.delete(supplier)
     db.session.commit()
     return redirect('/supplier')
@@ -185,6 +212,7 @@ def supplier_change():
     supplier_id = request.args.get('id')
     supplier = Supplier.query.filter_by(id=supplier_id).first()
     if request.method == 'POST':
+        name, person, phone, address = supplier.name, supplier.contact_person, supplier.phone, supplier.address
         supplier_name = request.form.get('supplier_name')
         supplier_person = request.form.get('supplier_person')
         supplier_phone = request.form.get('supplier_phone')
@@ -208,6 +236,13 @@ def supplier_change():
         supplier.phone = supplier_phone
         supplier.address = supplier_address
 
+        new_Warning = Warning(
+            description="修改供应商：{}->{},{}->{},{}->{},{}->{}"
+            .format(name, supplier_name, person, supplier_person, phone,
+                    supplier_phone, address, supplier_address),
+            date=date.today())
+
+        db.session.add(new_Warning)
         db.session.add(supplier)
         db.session.commit()
         return redirect('/supplier')
@@ -216,8 +251,11 @@ def supplier_change():
 
 @bp.route('/common/medicine')
 def common_medicine():
-    medicine = Medicine.query.all()
-    return render_template('common/medicine.html', Medicines=medicine)
+    medicines = Medicine.query.order_by(Medicine.id).all()
+    m_p = db.session.query(MedicinePrice).order_by(desc(MedicinePrice.date)).distinct(MedicinePrice.m_id).order_by(
+        MedicinePrice.m_id).all()
+    medicines = zip(medicines, m_p)
+    return render_template('medicine/medicine.html', Medicines=medicines)
 
 
 @bp.route('/medicine')
@@ -235,17 +273,17 @@ def medicine_add():
         medicine_id = request.form.get('medicine_id')
         medicine_name = request.form.get('medicine_name')
         medicine_s_id = int(request.form.get('supplier_id'))
-        medicine_price = float(request.form.get('medicine_price'))
-        medicine_stock = int(request.form.get('medicine_stock'))
+        price = float(request.form.get('price'))
         medicine_description = request.form.get('medicine_description')
         if medicine_id != "" and medicine_name != "" \
-                and medicine_price != "" and medicine_stock != "" \
+                and price != "" and medicine_s_id != "" \
                 and medicine_description != "":
             new_medicine = Medicine(id=medicine_id, name=medicine_name,
-                                    s_id=medicine_s_id, price=medicine_price,
-                                    stock=medicine_stock, description=medicine_description)
-            print(medicine_id, medicine_name, medicine_price, medicine_stock, medicine_description)
+                                    s_id=medicine_s_id, description=medicine_description)
+
+            new_price = MedicinePrice(m_id=medicine_id, price=price, date=date.today())
             db.session.add(new_medicine)
+            db.session.add(new_price)
             db.session.commit()
         return redirect('/medicine')
     return render_template('medicine/medicine_add.html')
@@ -254,9 +292,11 @@ def medicine_add():
 @bp.route('/medicine/delete')
 def medicine_delete():
     medicine_id = request.args.get('id')
-    medicine = Medicine.query.filter_by(id=medicine_id).first()
+    medicine = Medicine.query.filter(Medicine.id.like('%{}%'.format(medicine_id))).first()
+    new_Warning = Warning(description="删除药物：" + medicine.name, date=date.today())
     if medicine is None:
         return '药物不存在'
+    db.session.add(new_Warning)
     db.session.delete(medicine)
     db.session.commit()
     return redirect('/medicine')
@@ -265,12 +305,14 @@ def medicine_delete():
 @bp.route('/medicine/change', methods=['GET', 'POST'])
 def medicine_change():
     medicine_id = request.args.get('id')
-    medicine = Medicine.query.filter_by(id=medicine_id).first()
+    medicine = Medicine.query.filter(Medicine.id.like('%{}%'.format(medicine_id))).first()
+    m_p = db.session.query(MedicinePrice).filter(MedicinePrice.m_id.like(f'%{medicine_id}%')).order_by(
+        desc(MedicinePrice.date)).first()
     if request.method == 'POST':
         medicine_id = request.form.get('medicine_id')
         medicine_name = request.form.get('medicine_name')
         medicine_s_id = request.form.get('supplier_id')
-        medicine_price = float(request.form.get('medicine_price'))
+        price = float(request.form.get('price'))
         medicine_stock = int(request.form.get('medicine_stock'))
         medicine_description = request.form.get('medicine_description')
 
@@ -283,7 +325,7 @@ def medicine_change():
         if not medicine_s_id:
             flash('供应商编号不能为空')
             return redirect('/medicine_change')
-        if not medicine_price:
+        if not price:
             flash('药物售价不能为空')
             return redirect('/medicine_change')
         if not medicine_stock:
@@ -293,14 +335,15 @@ def medicine_change():
         medicine.id = medicine_id
         medicine.name = medicine_name
         medicine.s_id = medicine_s_id
-        medicine.price = medicine_price
         medicine.stock = medicine_stock
         medicine.description = medicine_description
 
+        new_price = MedicinePrice(m_id=medicine_id, price=price, cost=m_p.cost, date=date.today())
+        db.session.add(new_price)
         db.session.add(medicine)
         db.session.commit()
         return redirect('/medicine')
-    return render_template('medicine/medicine_change.html', medicine=medicine)
+    return render_template('medicine/medicine_change.html', medicine=medicine, mp=m_p)
 
 
 # 定义路由，用于处理获取药品详情的请求
@@ -311,7 +354,7 @@ def medicine_detail():
     id = request.args.get('id')
 
     # 从数据库中获取药品信息
-    medicine = Medicine.query.filter(func.substr(Medicine.s_id, func.length(Medicine.s_id) - 7, 8) == id).first()
+    medicine = Medicine.query.filter(Medicine.id.like('%{}%'.format(id))).first()
     supplier = Supplier.query.filter_by(id=medicine.s_id).first()
     # 将药品信息转换为字典
     medicine_dict = medicine.to_dict()
@@ -451,13 +494,16 @@ def orderlist_detail():
     order = Orderlist.query.filter_by(id=id).first()
     medicine = Medicine.query.filter_by(id=order.m_id).first()
     customer = Customer.query.filter_by(id=order.c_id).first()
+    m_p = db.session.query(MedicinePrice).filter(
+        and_(MedicinePrice.m_id.like(f'%{medicine.id}%'), MedicinePrice.date <= order.date)).order_by(
+        MedicinePrice.date.desc()).first()
     # 将订单信息转换为字典
     order_dict = order.to_dict()
     medicine_dict = medicine.to_dict()
     customer_dict = customer.to_dict()
+    mp_dict = m_p.to_dict()
     # 将订单信息转换为 JSON 格式，并将其作为响应发送回客户端
-    print(order_dict)
-    return jsonify(order_dict, medicine_dict, customer_dict)
+    return jsonify(order_dict, medicine_dict, customer_dict, mp_dict)
 
 
 @bp.route('/purchase')
@@ -472,18 +518,28 @@ def purchase_add():
         purchase_name = request.form.get('purchase_name')
         medicine_id = request.form.get('medicine_id')
         purchase_num = int(request.form.get('purchase_num'))
-        purchase_price = float(request.form.get('purchase_price'))
-        if purchase_name and medicine_id and purchase_num and purchase_price:
+        price = float(request.form.get('price'))
+        if purchase_name and medicine_id and purchase_num and price:
             if medicine_id not in [m.id for m in Medicine.query.all()]:
                 flash('Invalid medicine ID')
             elif purchase_num <= 0:
                 flash('Invalid quantity')
-            elif purchase_price <= 0:
+            elif price <= 0:
                 flash('Invalid price')
             else:
                 new_purchase = Purchase(medicine_id=medicine_id, name=purchase_name,
-                                        quantity=purchase_num, price=purchase_price,
-                                        purchase_date=date.today())
+                                        quantity=purchase_num, date=date.today())
+                latest_record = MedicinePrice.query.filter_by(m_id=medicine_id).order_by(
+                    desc(MedicinePrice.date)).first()
+                first_record = MedicinePrice.query.filter_by(m_id=medicine_id).order_by(
+                    MedicinePrice.date).first()
+                if latest_record.price != 0:
+                    new_price = MedicinePrice(m_id=medicine_id, cost=price,
+                                              price=first_record.price, date=date.today())
+                    db.session.add(new_price)
+                else:
+                    latest_record.price = price
+                    db.session.add(latest_record)
                 try:
                     db.session.add(new_purchase)
                     db.session.commit()
@@ -508,14 +564,13 @@ def purchase_delete():
     purchase_name = purchase.name
     purchase_type = "退货"
     purchase_medicine_id = purchase.medicine_id
-    purchase_price = purchase.price
     purchase_quantity = purchase.quantity
 
     # 更新订单的退货状态
     purchase.is_returned = True
     new_purchase = Purchase(medicine_id=purchase_medicine_id, name=purchase_name,
-                            quantity=purchase_quantity, price=purchase_price,
-                            purchase_date=date.today(), type=purchase_type)
+                            quantity=purchase_quantity, date=date.today(),
+                            type=purchase_type)
 
     db.session.add(new_purchase)
     db.session.commit()

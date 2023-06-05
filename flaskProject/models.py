@@ -51,7 +51,6 @@ class Supplier(db.Model):
 class Medicine(db.Model):
     __tablename__ = 'Medicine'
     id = db.Column(db.String(40), primary_key=True, nullable=False, unique=True)
-    storage_id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     s_id = db.Column(db.Integer, db.ForeignKey('Supplier.id'), nullable=False)
     name = db.Column(db.String(20), nullable=False)
     stock = db.Column(db.Integer, nullable=False, default=0)
@@ -60,7 +59,6 @@ class Medicine(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'storage_id': self.storage_id,
             's_id': self.s_id,
             'name': self.name,
             'stock': self.stock,
@@ -86,18 +84,13 @@ class MedicinePrice(db.Model):
         }
 
 
-class OrderType(Enum):
-    SOLD = "销售"
-    RETURN = "退货"
-
-
 class Orderlist(db.Model):
     __tablename__ = 'Orderlist'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     m_id = db.Column(db.String(40), db.ForeignKey('Medicine.id'))
     c_id = db.Column(db.Integer, db.ForeignKey('Customer.id'))
     name = db.Column(db.String(100))
-    type = db.Column(db.String(20), nullable=False, default=OrderType.SOLD)
+    type = db.Column(db.String(20), nullable=False, default="销售")
     date = db.Column(db.Date, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     is_returned = db.Column(db.Boolean, nullable=False, default=False)
@@ -115,17 +108,12 @@ class Orderlist(db.Model):
         }
 
 
-class PurchaseType(Enum):
-    PURCHASE = "采购"
-    RETURN = "退货"
-
-
 class Purchase(db.Model):
     __tablename__ = 'Purchase'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     name = db.Column(db.String(40), nullable=False)
-    type = db.Column(db.String(20), nullable=False, default=PurchaseType.PURCHASE)
+    type = db.Column(db.String(20), nullable=False, default="采购")
     quantity = db.Column(db.Integer, nullable=False)
     medicine_id = db.Column(db.String(40), db.ForeignKey('Medicine.id'), nullable=False)
     medicine = db.relationship('Medicine', backref=db.backref('purchases', lazy=True))
@@ -140,4 +128,18 @@ class Purchase(db.Model):
             'type': self.type,
             'medicine_id': self.medicine_id,
             'is_returned': self.is_returned
+        }
+
+
+class Warning(db.Model):
+    __tablename__ = 'warning'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    description = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'description': self.description,
+            'date': self.date
         }

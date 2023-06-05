@@ -44,11 +44,12 @@
                     const order = data[0];
                     const medicine = data[1];
                     const customer = data[2];
+                    const mp = data[3];
                     if (order.error) {
                         // 如果出错，弹出错误提示
                         alert(order.error);
                     } else {
-                        let sum = medicine.price * order.quantity;
+                        let sum = mp.price * order.quantity;
                         // 创建模态框的 HTML 结构
                         const modalHtml = `
                     <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">

@@ -18,7 +18,7 @@
         {% for purchase in Purchases %}
             <tr>
                 <td>{{ purchase.id }}</td>
-                <td>{{ purchase.purchase_date }}</td>
+                <td>{{ purchase.date }}</td>
                 <td>{{ purchase.name }}</td>
                 <td>
                     <a href="#" onclick="Detail({{ purchase.id }})">详细</a>{% if purchase.type != "退货" %}
@@ -60,7 +60,7 @@
                           </div>
                           <div class="modal-body">
                             <h5>${purchase.name}</h5>
-                            <p>创建时间: ${new Date(purchase.purchase_date).toLocaleDateString()}</p>
+                            <p>创建时间: ${new Date(purchase.date).toLocaleDateString()}</p>
                             <p>药物名称: ${medicine.name}</p>
                             <p>采购数量: ${purchase.quantity}</p>
                             <p>采购单价: ${purchase.price}</p>
