@@ -16,10 +16,10 @@
         </tr>
         </thead>
         <tbody id="myTable">
-        {% for Medicine in Medicines %}
+        {% for Medicine, MP in Medicines %}
             <tr>
                 <td>{{ Medicine.name }}</td>
-                <td>{{ Medicine.price }}</td>
+                <td>{{ MP.price }}</td>
                 <td>{{ Medicine.stock }}</td>
                 <td>{{ Medicine.id }}</td>
                 <td><a href="#" onclick="Detail({{ Medicine.storage_id }})">详细</a> <a

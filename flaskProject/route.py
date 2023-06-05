@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, redirect, request, flash, jsonify
 from datetime import date
-from models import db, User, Customer, Medicine, Orderlist, Supplier, Purchase
+
+from sqlalchemy import desc
+
+from models import db, User, Customer, Medicine, Orderlist, Supplier, Purchase, MedicinePrice
 from pyecharts.charts import Line
 from pyecharts import options as opts
 
@@ -39,15 +42,15 @@ def admin():
                                   Orderlist.quantity * Medicine.price - Orderlist.quantity * Purchase.price), 0).label(
                                   '利润')
                               ) \
-        .join(Medicine, Orderlist.m_id == Medicine.id) \
-        .join(Purchase, Medicine.id == Purchase.medicine_id) \
-        .filter(Purchase.purchase_date == Orderlist.date) \
+        .outerjoin(Medicine, Orderlist.m_id == Medicine.id) \
+        .outerjoin(Purchase, Medicine.id == Purchase.medicine_id and Purchase.purchase_date == Orderlist.date) \
+        .filter(Orderlist.type != "退货" and Orderlist.is_returned != 1) \
         .group_by(Orderlist.date).all()
     data = []
     for row in result:
         date, order_amount, purchase_amount = row
         data.append((date.strftime('%Y-%m-%d'), order_amount - purchase_amount))
-        print(date, order_amount, purchase_amount)
+        print("时间", date, "销售额", order_amount, "利润", purchase_amount)
     line = create_line(data)
     return render_template('index.html', line=line)
 
@@ -66,6 +69,14 @@ def create_line(data):
             yaxis_opts=opts.AxisOpts(type_="value"),
         )
     )
+    line.set_global_opts(
+        title_opts=opts.TitleOpts(title="每日净收入", pos_left='center'),
+        legend_opts=opts.LegendOpts(pos_left='center', pos_top='bottom'),
+        tooltip_opts=opts.TooltipOpts(trigger="axis"),
+        xaxis_opts=opts.AxisOpts(type_="category"),
+        yaxis_opts=opts.AxisOpts(type_="value"),
+    )
+    line.set_series_opts(label_opts=opts.LabelOpts(is_show=False))
     return line.render_embed()
 
 
@@ -211,8 +222,11 @@ def common_medicine():
 
 @bp.route('/medicine')
 def medicine():
-    medicine = Medicine.query.all()
-    return render_template('medicine/medicine.html', Medicines=medicine)
+    medicines = Medicine.query.order_by(Medicine.id).all()
+    m_p = db.session.query(MedicinePrice).order_by(desc(MedicinePrice.date)).distinct(MedicinePrice.m_id).order_by(
+        MedicinePrice.m_id).all()
+    medicines = zip(medicines, m_p)
+    return render_template('medicine/medicine.html', Medicines=medicines)
 
 
 @bp.route('/medicine/add', methods=['GET', 'POST'])
