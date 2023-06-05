@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, request, flash, jsonify
 from datetime import date
 
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 
 from models import db, User, Customer, Medicine, Orderlist, Supplier, Purchase, MedicinePrice
 from pyecharts.charts import Line
@@ -308,10 +308,10 @@ def medicine_change():
 @bp.route('/medicine/detail')
 def medicine_detail():
     # 获取药品 ID
-    id = request.args.get('storage_id')
+    id = request.args.get('id')
 
     # 从数据库中获取药品信息
-    medicine = Medicine.query.filter_by(storage_id=id).first()
+    medicine = Medicine.query.filter(func.substr(Medicine.s_id, func.length(Medicine.s_id) - 7, 8) == id).first()
     supplier = Supplier.query.filter_by(id=medicine.s_id).first()
     # 将药品信息转换为字典
     medicine_dict = medicine.to_dict()

@@ -22,7 +22,7 @@
                 <td>{{ MP.price }}</td>
                 <td>{{ Medicine.stock }}</td>
                 <td>{{ Medicine.id }}</td>
-                <td><a href="#" onclick="Detail({{ Medicine.storage_id }})">详细</a> <a
+                <td><a href="#" onclick="Detail({{ Medicine.id }})">详细</a> <a
                         href="/medicine/change?id={{ Medicine.id }}">修改</a> <a
                         href="#" onclick="confirmDelete({{ Medicine.id }})">删除</a></td>
             </tr>
@@ -38,7 +38,7 @@
     <script>
         function Detail(id) {
             // 发送 AJAX 请求获取订单详情
-            fetch(`/medicine/detail?storage_id=${id}`)
+            fetch(`/medicine/detail?id=${id.slice(-8)}`)
                 .then(response => response.json())
                 .then(data => {
                     const medicine = data[0];

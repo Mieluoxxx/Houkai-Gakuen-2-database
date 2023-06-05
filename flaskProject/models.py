@@ -54,7 +54,7 @@ class Medicine(db.Model):
     storage_id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     s_id = db.Column(db.Integer, db.ForeignKey('Supplier.id'), nullable=False)
     name = db.Column(db.String(20), nullable=False)
-    stock = db.Column(db.Integer, nullable=False)
+    stock = db.Column(db.Integer, nullable=False, default=0)
     description = db.Column(db.String(60), nullable=False)
 
     def to_dict(self):
@@ -72,8 +72,8 @@ class MedicinePrice(db.Model):
     __tablename__ = 'Price'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     m_id = db.Column(db.String(40), db.ForeignKey('Medicine.id'), nullable=False)
-    cost = db.Column(db.Float, nullable=False)
-    price = db.Column(db.Float, nullable=False)
+    cost = db.Column(db.Float, nullable=False, default=0)
+    price = db.Column(db.Float, nullable=False, default=0)
     date = db.Column(db.Date, nullable=False)
 
     def to_dict(self):
@@ -135,7 +135,7 @@ class Purchase(db.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'purchase_date': self.purchase_date,
+            'date': self.date,
             'quantity': self.quantity,
             'type': self.type,
             'medicine_id': self.medicine_id,
